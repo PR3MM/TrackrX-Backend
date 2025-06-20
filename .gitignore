@@ -1,0 +1,39 @@
+// full .gitignore file for a Node.js project
+
+# Node.js dependencies
+/node_modules
+# Optional npm cache directory
+.npm
+# Optional yarn cache directory
+.yarn
+# Optional pnpm store directory
+.pnpm-store
+# Optional build output
+/dist
+# Optional coverage directory
+
+/coverage
+# Optional logs
+/logs
+# Optional environment variables
+.env
+# Optional IDE files
+.idea
+# Optional VS Code files
+.vscode
+# Optional macOS files
+.DS_Store
+# Optional Windows files
+Thumbs.db
+
+# Optional Linux files
+.Trash-*
+# Optional temporary files
+*.tmp
+# Optional lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+# Optional test files
+*.test.js
+*.spec.js
