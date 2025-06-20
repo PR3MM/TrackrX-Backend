@@ -37,3 +37,13 @@ pnpm-lock.yaml
 # Optional test files
 *.test.js
 *.spec.js
+
+.# Optional build files
+/build
+# Optional documentation files
+/docs
+# Optional configuration files
+*.config.js
+# Optional database files
+
+.gitignore
