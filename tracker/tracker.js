@@ -186,12 +186,12 @@ function getBounceRate() {
 // Function to send data to the server
 async function sendDataToServer(data) {
     try {
-        const response = await fetch('https://your-server-endpoint.com/track', {
+        const response = await fetch('http://localhost:3000/track', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data)  
         });
         if (!response.ok) {
             throw new Error('Network response was not ok');
