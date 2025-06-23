@@ -157,15 +157,14 @@ function getScrollDepth() {
     return Math.round(scrollDepth);
 }
 // Function to get click heatmap data
-function getClickHeatmap() {
-    const heatmap = [];
-    document.addEventListener('click', function (event) {
-        const x = event.clientX;
-        const y = event.clientY;
-        heatmap.push({ x, y });
-    });
-    return heatmap;
-}
+const clickHeatmap = [];
+
+document.addEventListener('click', function (event) {
+    const x = event.clientX;
+    const y = event.clientY;
+    clickHeatmap.push({ x, y });
+});
+
 // Function to get time spent on page
 let timeOnPage = 0;
 let pageLoadTime = Date.now();
@@ -245,12 +244,12 @@ window.addEventListener('beforeunload', () => {
 
 
 // main function to track the metrics by calling other functions and then sending the data to the server
-function trackMetrics() {
+async function trackMetrics() {
     // Get the session ID
     const sessionId = getSessionId();
 
     // Get the user IP address
-    const userIp = getUserIp();
+    const userIp =  await getUserIp();
 
     // Get the referrer
     const referrer = document.referrer;
@@ -265,11 +264,9 @@ function trackMetrics() {
     // Get the browser information
     const browserInfo = getBrowserInfo();
     // Get the geolocation
-    const geolocation = getGeolocation();
+    const geolocation = await getGeolocation();
     // Get the scroll depth
     const scrollDepth = getScrollDepth();
-    // Get the click heatmap
-    const clickHeatmap = getClickHeatmap();
     // Get the time on page
     const timeOnPage = getTimeOnPage();
     // Get the bounce rate
@@ -291,5 +288,6 @@ function trackMetrics() {
         bounceRate
     };
     // Send the data to the server
+    console.log('Tracking data:', data);
     sendDataToServer(data);
 }
