@@ -14,7 +14,8 @@ const trackingDataSchema = new Schema({
     timeOnPage: { type: Number, default: 0 },
     bounceRate: { type: Number, default: 0 }
 }, {
-    timestamps: true 
+    timestamps: true,
+    collection: 'tracking_data'
 });
 const TrackingData = model('TrackingData', trackingDataSchema);
 
