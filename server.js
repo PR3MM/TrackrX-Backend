@@ -17,7 +17,6 @@ dotenv.config();
 connectDB();
 
 app.use('/', router);
-// Handle 404 errors
 
 
 

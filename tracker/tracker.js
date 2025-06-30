@@ -28,15 +28,23 @@
 function generateSessionId() {
     const sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
     sessionStorage.setItem("sessionId", sessionId);
-    setTimeout(() => {
-        sessionStorage.removeItem("sessionId");
-    }, 30 * 60 * 1000);
+    sessionStorage.setItem("sessionCreatedAt", Date.now().toString());
     return sessionId;
 }
 
 // Function to get the session ID
 function getSessionId() {
-    return sessionStorage.getItem("sessionId") || generateSessionId();
+    const existingSessionId = sessionStorage.getItem("sessionId");
+    const sessionCreatedAt = parseInt(sessionStorage.getItem("sessionCreatedAt"), 10);
+    const now = Date.now();
+
+    if (existingSessionId && sessionCreatedAt && (now - sessionCreatedAt < 30 * 60 * 1000)) {
+        // Still valid session
+        return existingSessionId;
+    }
+
+    // Expired or missing
+    return generateSessionId();
 }
 
 // Function to get the user IP address
@@ -101,6 +109,7 @@ function getDeviceInfo() {
         deviceType,
         os
     };
+    // return os;
 }
 
 // Function to get browser information
@@ -137,6 +146,7 @@ async function getGeolocation() {
             latitude: data.latitude || 0,
             longitude: data.longitude || 0
         };
+        // return data.country_name || 'unknown';
     } catch (error) {
         console.error('Error fetching geolocation:', error);
         return {
@@ -186,7 +196,7 @@ function getBounceRate() {
 // Function to send data to the server
 async function sendDataToServer(data) {
     try {
-        const response = await fetch('http://localhost:3000/track', {
+        const response = await fetch('http://localhost:3000/info', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -201,6 +211,14 @@ async function sendDataToServer(data) {
     catch (error) {
         console.error('Error sending data to server:', error);
     }
+
+    // try {
+    //     const url = 'http://localhost:3000/info';
+    //     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    //     navigator.sendBeacon(url, blob);
+    // } catch (error) {
+    //     console.error('sendBeacon failed:', error);
+    // }
 }
 // Event listener to mark the page as viewed
 document.addEventListener('DOMContentLoaded', () => {
@@ -210,11 +228,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Event listener to track scroll depth
+let scrollTimeout;
 window.addEventListener('scroll', () => {
-    const scrollDepth = getScrollDepth();
-    console.log('Scroll Depth:', scrollDepth + '%');
-}
-);
+    if (!scrollTimeout) {
+        scrollTimeout = setTimeout(() => {
+            const scrollDepth = getScrollDepth();
+            console.log('Scroll Depth:', scrollDepth + '%');
+            scrollTimeout = null;
+        }, 1000); // one update per second
+    }
+});
 
 // Event listener to track clicks for heatmap
 document.addEventListener('click', (event) => {
@@ -255,7 +278,12 @@ async function trackMetrics() {
     const referrer = document.referrer;
 
     // Get the current page URL
-    const currentPage = window.location.href;
+    // const currentPage = window.location.href;
+    const url = new URL(window.location.href);
+    const currentPage = url.host;
+
+    // Get the pathname
+    const pathname = window.location.pathname;
 
     // Get the UTM parameters
     const utmParams = getUtmParameters();
@@ -271,21 +299,24 @@ async function trackMetrics() {
     const timeOnPage = getTimeOnPage();
     // Get the bounce rate
     const bounceRate = getBounceRate();
-    // Prepare the data to be sent to the server
+    // current time
+    const currentTime = new Date().toISOString();
 
     const data = {
         sessionId,
         userIp,
         referrer,
         currentPage,
+        pathname,
         utmParams,
         deviceInfo,
-        browserInfo,
+        // browserInfo,
         geolocation,
         scrollDepth,
-        clickHeatmap,
+        // clickHeatmap,
         timeOnPage,
-        bounceRate
+        bounceRate,
+        currentTime
     };
     // Send the data to the server
     console.log('Tracking data:', data);

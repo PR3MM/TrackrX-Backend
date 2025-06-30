@@ -6,6 +6,8 @@ const connectDB = async () => {
         await connect(process.env.MONGO_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
+            dbName: process.env.DB_NAME || 'trackrxdb',
+
         });
         console.log('MongoDB connected successfully');
     } catch (error) {
