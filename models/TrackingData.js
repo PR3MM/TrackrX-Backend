@@ -6,6 +6,7 @@ const trackingDataSchema = new Schema({
     referrer: { type: String  },
     currentPage: { type: String, required: true },
     pathname: { type: String, required: true },
+    websiteUrl: { type: String, required: true },
     utmParameters: { type: Object, default: {} },
     deviceInfo: { type: Object, default: {} },
     browserInfo: { type: Object, default: {} },

@@ -9,6 +9,7 @@ export async function track(req, res) {
         referrer,
         currentPage,
         pathname,
+        websiteUrl,
         utmParameters,
         deviceInfo,
         browserInfo,
@@ -28,6 +29,7 @@ export async function track(req, res) {
             referrer,
             currentPage,
             pathname,
+            websiteUrl,
             utmParameters,
             deviceInfo,
             browserInfo,
@@ -177,7 +179,7 @@ export async function getMetrics(req, res) {
             const date = new Date(data.createdAt);
             const day = date.toISOString().split('T')[0];
             const week = new Date(date.setDate(date.getDate() - date.getDay())).toISOString().split('T')[0];
-            const month = date.toISOString().split('T')[0].slice(0, 7); // YYYY-MM format
+            const month = date.toISOString().split('T')[0].slice(0, 7);  
             dailyStats[day] = (dailyStats[day] || 0) + 1;
             weeklyStats[week] = (weeklyStats[week] || 0) + 1;
             monthlyStats[month] = (monthlyStats[month] || 0) + 1;
@@ -193,6 +195,7 @@ export async function getMetrics(req, res) {
 
 
         res.status(200).json({
+            
             totalViews,
             averageTimeonPage,
             bounceRate: parseFloat(bounceRate.toFixed(2)),

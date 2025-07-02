@@ -282,11 +282,14 @@ async function trackMetrics() {
     const url = new URL(window.location.href);
     const currentPage = url.host;
 
+    // Get the website URL
+    const websiteUrl = window.location.origin;
+
     // Get the pathname
     const pathname = window.location.pathname;
 
     // Get the UTM parameters
-    const utmParams = getUtmParameters();
+    const utmParameters = getUtmParameters();
     // Get the device and OS
     const deviceInfo = getDeviceInfo();
     // Get the browser information
@@ -308,7 +311,8 @@ async function trackMetrics() {
         referrer,
         currentPage,
         pathname,
-        utmParams,
+        websiteUrl,
+        utmParameters,
         deviceInfo,
         // browserInfo,
         geolocation,
