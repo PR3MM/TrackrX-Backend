@@ -79,7 +79,7 @@ export async function getMetrics(req, res) {
             const map = {
                 '1h': 1, '6h': 6, '12h': 12,
                 '1d': 24, '3d': 72,
-                '24h': 24, '7d': 168, '30d': 720, '1y': 8760
+                '24h': 24, '7d': 168, '30d': 720,'6m':4382 ,'1y': 8760
             };
             const hours = map[timerange];
             if (hours) {
@@ -171,7 +171,156 @@ export async function getMetrics(req, res) {
         //     .slice(0, 5);
         const topCountries = countryStats;
 
-        // daily/weekly/monthly stats
+        // Generate time series data based on selected timerange
+        let chartData = { labels: [], data: [] };
+        
+        if (timerange && timerange !== 'all') {
+            const now = new Date();
+            const timeRangeMap = {
+                '1h': { hours: 1, interval: 'minutes', intervalSize: 10 },
+                '6h': { hours: 6, interval: 'hours', intervalSize: 1 },
+                '12h': { hours: 12, interval: 'hours', intervalSize: 2 },
+                '1d': { hours: 24, interval: 'hours', intervalSize: 4 },
+                '24h': { hours: 24, interval: 'hours', intervalSize: 4 },
+                '3d': { hours: 72, interval: 'hours', intervalSize: 12 },
+                '7d': { hours: 168, interval: 'days', intervalSize: 1 },
+                '30d': { hours: 720, interval: 'days', intervalSize: 1 },
+                '6m': { hours: 4382, interval: 'weeks', intervalSize: 1 },
+                '1y': { hours: 8760, interval: 'months', intervalSize: 1 }
+            };
+
+            const config = timeRangeMap[timerange];
+            if (config) {
+                const startTime = new Date(now.getTime() - config.hours * 60 * 60 * 1000);
+                
+                if (config.interval === 'minutes') {
+                    // For 1 hour - 10 minute intervals
+                    for (let i = 0; i < 6; i++) {
+                        const intervalStart = new Date(startTime.getTime() + i * 10 * 60 * 1000);
+                        const intervalEnd = new Date(startTime.getTime() + (i + 1) * 10 * 60 * 1000);
+                        const label = `${intervalStart.getHours()}:${intervalStart.getMinutes().toString().padStart(2, '0')}`;
+                        
+                        const count = trackingData.filter(data => {
+                            const dataTime = new Date(data.createdAt);
+                            return dataTime >= intervalStart && dataTime < intervalEnd;
+                        }).length;
+                        
+                        chartData.labels.push(label);
+                        chartData.data.push(count);
+                    }
+                } else if (config.interval === 'hours') {
+                    // For 6h, 12h, 1d, 3d
+                    const intervals = Math.ceil(config.hours / config.intervalSize);
+                    for (let i = 0; i < intervals; i++) {
+                        const intervalStart = new Date(startTime.getTime() + i * config.intervalSize * 60 * 60 * 1000);
+                        const intervalEnd = new Date(startTime.getTime() + (i + 1) * config.intervalSize * 60 * 60 * 1000);
+                        
+                        let label;
+                        if (config.intervalSize === 1) {
+                            label = `${intervalStart.getHours()}:00`;
+                        } else {
+                            label = `${intervalStart.getHours()}:00-${intervalEnd.getHours()}:00`;
+                        }
+                        
+                        const count = trackingData.filter(data => {
+                            const dataTime = new Date(data.createdAt);
+                            return dataTime >= intervalStart && dataTime < intervalEnd;
+                        }).length;
+                        
+                        chartData.labels.push(label);
+                        chartData.data.push(count);
+                    }
+                } else if (config.interval === 'days') {
+                    // For 7d, 30d
+                    const days = Math.ceil(config.hours / 24);
+                    for (let i = 0; i < days; i++) {
+                        const dayStart = new Date(startTime);
+                        dayStart.setDate(dayStart.getDate() + i);
+                        dayStart.setHours(0, 0, 0, 0);
+                        
+                        const dayEnd = new Date(dayStart);
+                        dayEnd.setDate(dayEnd.getDate() + 1);
+                        
+                        const label = dayStart.toISOString().split('T')[0];
+                        
+                        const count = trackingData.filter(data => {
+                            const dataTime = new Date(data.createdAt);
+                            return dataTime >= dayStart && dataTime < dayEnd;
+                        }).length;
+                        
+                        chartData.labels.push(label);
+                        chartData.data.push(count);
+                    }
+                } else if (config.interval === 'weeks') {
+                    // For 6m
+                    const weeks = Math.ceil(config.hours / (24 * 7));
+                    for (let i = 0; i < weeks; i++) {
+                        const weekStart = new Date(startTime);
+                        weekStart.setDate(weekStart.getDate() + i * 7);
+                        weekStart.setHours(0, 0, 0, 0);
+                        
+                        const weekEnd = new Date(weekStart);
+                        weekEnd.setDate(weekEnd.getDate() + 7);
+                        
+                        const label = `Week ${weekStart.toISOString().split('T')[0]}`;
+                        
+                        const count = trackingData.filter(data => {
+                            const dataTime = new Date(data.createdAt);
+                            return dataTime >= weekStart && dataTime < weekEnd;
+                        }).length;
+                        
+                        chartData.labels.push(label);
+                        chartData.data.push(count);
+                    }
+                } else if (config.interval === 'months') {
+                    // For 1y
+                    for (let i = 0; i < 12; i++) {
+                        const monthStart = new Date(startTime);
+                        monthStart.setMonth(monthStart.getMonth() + i);
+                        monthStart.setDate(1);
+                        monthStart.setHours(0, 0, 0, 0);
+                        
+                        const monthEnd = new Date(monthStart);
+                        monthEnd.setMonth(monthEnd.getMonth() + 1);
+                        
+                        const label = `${monthStart.getFullYear()}-${(monthStart.getMonth() + 1).toString().padStart(2, '0')}`;
+                        
+                        const count = trackingData.filter(data => {
+                            const dataTime = new Date(data.createdAt);
+                            return dataTime >= monthStart && dataTime < monthEnd;
+                        }).length;
+                        
+                        chartData.labels.push(label);
+                        chartData.data.push(count);
+                    }
+                }
+            }
+        } else {
+            // Default: show last 30 days when no timerange specified
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            for (let i = 0; i < 30; i++) {
+                const d = new Date(startDate);
+                d.setDate(d.getDate() + i);
+                const dayStart = new Date(d);
+                dayStart.setHours(0, 0, 0, 0);
+                const dayEnd = new Date(d);
+                dayEnd.setHours(23, 59, 59, 999);
+                
+                const label = d.toISOString().split('T')[0];
+                
+                const count = trackingData.filter(data => {
+                    const dataTime = new Date(data.createdAt);
+                    return dataTime >= dayStart && dataTime <= dayEnd;
+                }).length;
+                
+                chartData.labels.push(label);
+                chartData.data.push(count);
+            }
+        }
+
+        // Legacy stats for backward compatibility
         const dailyStats = {};
         const weeklyStats = {};
         const monthlyStats = {};
@@ -195,7 +344,6 @@ export async function getMetrics(req, res) {
 
 
         res.status(200).json({
-            
             totalViews,
             averageTimeonPage,
             bounceRate: parseFloat(bounceRate.toFixed(2)),
@@ -205,6 +353,7 @@ export async function getMetrics(req, res) {
             topreferrers,
             topPages,
             engagementBuckets,
+            chartData, // New chart data with labels and data arrays
             dailyStats,
             weeklyStats,
             monthlyStats,
