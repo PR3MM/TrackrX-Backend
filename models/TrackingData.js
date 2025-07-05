@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 
 const trackingDataSchema = new Schema({
+    totalVisitor: { type: String, required: true },  
     sessionId: { type: String, required: true },
     userIp: { type: String, required: true },
     referrer: { type: String  },
@@ -19,6 +20,10 @@ const trackingDataSchema = new Schema({
     timestamps: true,
     collection: 'tracking_data'
 });
+
+// Create index on totalVisitor for better performance when counting unique visitors
+trackingDataSchema.index({ totalVisitor: 1 });
+
 const TrackingData = model('TrackingData', trackingDataSchema);
 
 export default TrackingData;

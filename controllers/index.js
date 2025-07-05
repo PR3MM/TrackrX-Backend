@@ -4,6 +4,7 @@ import TrackingData from '../models/TrackingData.js';
 export async function track(req, res) {
 
     const {
+        totalVisitor,
         sessionId,
         userIp,
         referrer,
@@ -24,6 +25,7 @@ export async function track(req, res) {
 
 
         const trackingData = {
+            totalVisitor,
             sessionId,
             userIp,
             referrer,
@@ -104,6 +106,10 @@ export async function getMetrics(req, res) {
         const trackingData = await TrackingData.find(query).sort({ createdAt: -1 });
         console.log(trackingData.length, "trackingData:", trackingData);
         const totalViews = trackingData.length;
+        
+        // Calculate unique visitors using totalVisitor field
+        const uniqueVisitors = new Set(trackingData.map(data => data.totalVisitor)).size;
+        
         const avgTimeOnPage = trackingData.reduce((acc, data) => acc + (data.timeOnPage || 0), 0) / (totalViews || 1);
         const bounceCount = trackingData.filter(data => data.bounceRate === 1).length;
         const bounceRate = (bounceCount / (totalViews || 1)) * 100;
@@ -345,6 +351,7 @@ export async function getMetrics(req, res) {
 
         res.status(200).json({
             totalViews,
+            uniqueVisitors,
             averageTimeonPage,
             bounceRate: parseFloat(bounceRate.toFixed(2)),
             topCountries,
@@ -353,7 +360,7 @@ export async function getMetrics(req, res) {
             topreferrers,
             topPages,
             engagementBuckets,
-            chartData, // New chart data with labels and data arrays
+            chartData, 
             dailyStats,
             weeklyStats,
             monthlyStats,

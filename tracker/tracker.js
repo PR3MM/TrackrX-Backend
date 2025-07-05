@@ -23,6 +23,44 @@
 // tracker.js will be used to track the metrics and send them to the server
 
 
+// Function to set a cookie with expiration
+function setCookie(name, value, days) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+}
+
+// Function to get a cookie value
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+// Function to generate a unique visitor ID
+function generateVisitorId() {
+    return 'visitor-' + Math.random().toString(36).substr(2, 16) + '-' + Date.now();
+}
+
+// Function to get or create visitor ID with 1-year TTL
+function getVisitorId() {
+    const existingVisitorId = getCookie('trackrx_visitor_id');
+    
+    if (existingVisitorId) {
+        return existingVisitorId;
+    }
+    
+    // Create new visitor ID and set cookie for 1 year (365 days)
+    const newVisitorId = generateVisitorId();
+    setCookie('trackrx_visitor_id', newVisitorId, 365);
+    return newVisitorId;
+}
+
 // Function to generate a unique session ID 
 // delete the session ID after 30 minutes of inactivity
 function generateSessionId() {
@@ -196,7 +234,7 @@ function getBounceRate() {
 // Function to send data to the server
 async function sendDataToServer(data) {
     try {
-        const response = await fetch('http://localhost:3000/info', {
+        const response = await fetch('http://localhost:3001/info', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -268,6 +306,9 @@ window.addEventListener('beforeunload', () => {
 
 // main function to track the metrics by calling other functions and then sending the data to the server
 async function trackMetrics() {
+    // Get the visitor ID (unique user identifier with 1-year TTL)
+    const totalVisitor = getVisitorId();
+    
     // Get the session ID
     const sessionId = getSessionId();
 
@@ -306,6 +347,7 @@ async function trackMetrics() {
     const currentTime = new Date().toISOString();
 
     const data = {
+        totalVisitor,
         sessionId,
         userIp,
         referrer,
