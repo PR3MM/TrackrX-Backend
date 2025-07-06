@@ -3,6 +3,7 @@ import cors from 'cors';
 import router from './routes/index.js';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
+dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -11,7 +12,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
-dotenv.config();
 
 
 connectDB();
