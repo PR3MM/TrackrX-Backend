@@ -368,3 +368,7 @@ async function trackMetrics() {
     console.log('Tracking data:', data);
     sendDataToServer(data);
 }
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await trackMetrics(); 
+});
