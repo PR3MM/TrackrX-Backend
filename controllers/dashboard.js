@@ -10,7 +10,7 @@ let dashboardController = {
             const response = await TrackingData.find({})
             // const data = await response.json();
             const urls = response.map(item => item.websiteUrl);
-
+            
             const cleanUrls = urls.filter(item => {if(item!==null){
 
                 return item;
