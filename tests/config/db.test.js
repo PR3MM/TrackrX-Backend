@@ -10,6 +10,7 @@ describe('config/db', () => {
     connect.mockReset();
   });
 
+  //unit testing
   it('calls mongoose.connect with environment values', async () => {
     connect.mockResolvedValueOnce();
     await connectDB();
@@ -20,6 +21,7 @@ describe('config/db', () => {
     }));
   });
 
+  //unit testing
   it('exits process on connection error', async () => {
     const spyExit = jest.spyOn(process, 'exit').mockImplementation(() => { throw new Error('process.exit called'); });
     connect.mockRejectedValueOnce(new Error('failed'));

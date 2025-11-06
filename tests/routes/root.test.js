@@ -8,3 +8,4 @@ describe('GET /', () => {
     expect(res.body).toHaveProperty('message', 'Welcome to TrackrX API');
   });
 });
+  
