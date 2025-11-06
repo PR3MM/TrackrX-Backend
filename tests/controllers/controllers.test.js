@@ -9,6 +9,8 @@ describe('controllers', () => {
     jest.clearAllMocks();
   });
 
+  
+  //unit testing to test successfull data saving and error handling
   describe('track', () => {
     it('saves tracking data and returns 201', async () => {
       TrackingData.mockImplementation(function (data) {
@@ -28,8 +30,10 @@ describe('controllers', () => {
       expect(res.body.message).toMatch(/Tracking data saved/);
     });
 
+
     it('handles save errors and returns 500', async () => {
       TrackingData.mockImplementation(function () {
+        // simulate save error
         return { save: jest.fn().mockRejectedValueOnce(new Error('db error')) };
       });
 
@@ -46,6 +50,8 @@ describe('controllers', () => {
       expect(res.body.message).toMatch(/Internal server error/);
     });
   });
+
+
 
   describe('getMetrics', () => {
     it('returns 400 for invalid timerange', async () => {
@@ -73,7 +79,6 @@ describe('controllers', () => {
         createdAt: now
       };
 
-  // Controller calls TrackingData.find(query).sort({ createdAt: -1 })
   // Mock find to return an object with sort() that returns the array
   TrackingData.find = jest.fn().mockImplementation(() => ({ sort: () => Promise.resolve([doc]) }));
 
@@ -120,6 +125,7 @@ describe('controllers', () => {
       expect(receivedQuery.createdAt).toBeDefined();
     });
 
+    //  test query params filtering
     it('supports minTime, device and browser query params', async () => {
       const doc = { totalVisitor: 'x', timeOnPage: 200, bounceRate: 0, deviceInfo: { deviceType: 'desktop' }, geolocation: { country: 'A' }, referrer: 'R', pathname: 'p', websiteUrl: 'u', createdAt: new Date() };
       let receivedQuery;
@@ -150,6 +156,7 @@ describe('controllers', () => {
       }
     });
 
+    //  test intervalSize logic for various timeranges
     it('builds hours-interval chartData for 12h (intervalSize 2)', async () => {
       const now = new Date();
       const doc = { totalVisitor: 'a', timeOnPage: 10, bounceRate: 0, deviceInfo: {}, geolocation: {}, referrer: '', pathname: 'p', websiteUrl: 'u', createdAt: now };
@@ -178,6 +185,7 @@ describe('controllers', () => {
       expect(res.status).toBe(500);
     });
 
+    // test default 30-day chartData and engagement buckets logic
     it('uses default 30-day chartData when no timerange provided', async () => {
       const now = new Date();
       // two docs on different days within last 30 days

@@ -2,6 +2,10 @@ import TrackingData from '../../models/TrackingData.js';
 import mongoose from 'mongoose';
 
 // test 1
+// oo
+// TrackingData = class
+// constraints = properties 
+// documents = objects
 describe('TrackingData Model', () => {
   it('should save tracking data document', async () => {
     const trackingData = new TrackingData({
