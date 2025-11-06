@@ -53,7 +53,7 @@ function initializeSelfPing() {
 // Start server
 app.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);
-  // initializeSelfPing();
+  initializeSelfPing();
 });
 
 export default app;
