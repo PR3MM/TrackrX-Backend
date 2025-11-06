@@ -20,7 +20,7 @@ describe('GET /get_metrics', () => {
     });
 
 
-    // UNIT TEST
+
     it('responds with metrics object for valid timerange', async () => {
         const res = await request(app).get('/get_metrics?pathname=metrics.home&timerange=24h');
         expect(res.status).toBe(200);
@@ -34,7 +34,7 @@ describe('GET /get_metrics', () => {
         expect(res.body.bounceRate).toBe(0);
     });
 
-    // UNIT TEST
+
     it('returns 400 for invalid timerange', async () => {
         const res = await request(app).get('/get_metrics?timerange=invalid');
         expect(res.status).toBe(400);
@@ -42,7 +42,7 @@ describe('GET /get_metrics', () => {
     });
 
 
-    // OBJECT-ORIENTED TESTING: checking method behavior and computed values
+//    checking method behavior and computed values
     //   engagementBuckets is an object
     it('calculates engagement buckets correctly', async () => {
         const res = await request(app).get('/get_metrics?pathname=metrics.home&timerange=24h');
@@ -54,7 +54,7 @@ describe('GET /get_metrics', () => {
     });
 
 
-    // OBJECT-ORIENTED TESTING: handles edge case (empty DB)
+
     it('handles empty database gracefully', async () => {
         await TrackingData.deleteMany({});
         const res = await request(app).get('/get_metrics?pathname=metrics.home&timerange=24h');
